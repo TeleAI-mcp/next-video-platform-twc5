@@ -1,0 +1,32 @@
+name: Issue Label Comment Bot
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add comment on label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+            const label = context.payload.label.name;
+            
+            let comment = '';
+            if (label === 'completed') {
+              comment = 'This issue has been resolved. Thank you for your contribution!';
+            } else if (label === 'documentation') {
+              comment = 'Thank you for flagging this documentation issue. We will update it soon.';
+            }
+            
+            if (comment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment
+              });
+            }
